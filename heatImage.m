@@ -1,6 +1,7 @@
 clear;
 clc;
 D = 12.2;
+H = 4.8;
 global com;
 com = serial('COM10','BaudRate',250000,'Terminator','CR');
 com.InputBufferSize = 10000;
@@ -88,11 +89,40 @@ fopen(com);
         xR = blobs2.Location(1,1);
         yR = blobs2.Location(1,2);
         
-        temp = (imgL(round(yL),round(xL))+imgR(round(yR),round(xR)))/2
+        temp = (imgL(round(yL),round(xL))+imgR(round(yR),round(xR)))/2;
         
-        alphaL = (xL - 240)*(55/480)
-        alphaR = (xR - 240)*(55/480)
-        beta = ((yR+yL)/2 - 180)*(35/360)
+        alphaL = (xL - 240)*(55/480);
+        alphaR = (xR - 240)*(55/480);
+        beta = ((yR+yL)/2 - 180)*(35/360);
+        
+        if alphaR >= 0 && alphaL <= 0
+            aL = 90 - abs(alphaL);
+            aR = 90 - alphaR;
+            x = ((D*tand(aR))/(tand(aL) + tand(aR)));
+            fx = x*tand(aL)
+        elseif alphaR >= 0 && alphaL >= 0
+            aL = 90 - alphaL;
+            aR = 90 - alphaR;
+            x = ((D*tand(aR))/(tand(aL) - tand(aR)));
+            fx = x*tand(aL)
+        else
+            aL = 90 - abs(alphaL);
+            aR = 90 - abs(alphaR);
+            x = ((D*tand(aR))/(tand(aR) - tand(aL)));
+            fx = x*tand(aL)
+        end
+        
+        if beta < 0
+            fy = H + fx*tand(abs(beta))
+        else
+            fy = H - fx*tand(beta)
+        end
+        
+        fx = fx/cosd(abs(beta))
+        
+%         temperature = (temp+50)*(fx/30)*(fx/30)
+        temperature = temp*fx/10
+        
     end
     
 %     if matchedPoints1.Count > 0 && matchedPoints2.Count > 0
@@ -100,8 +130,6 @@ fopen(com);
 %         yL = round(matchedPoints1.Location(1,2));
 %         xR = round(matchedPoints2.Location(1,1));
 %         yR = round(matchedPoints2.Location(1,2));
-% 
-%         temp = (imgL(yL,xL)+imgR(yR,xR))/2
 %     end
     
 %     [fMatrix, epipolarInliers, status] = estimateFundamentalMatrix(...
