@@ -164,10 +164,10 @@ fopen(com);
     hold on;
     plot(selectStrongest(blobs1, 30));
     
-    [features1, validBlobs1] = extractFeatures(Lgray, blobs1);
-    [features2, validBlobs2] = extractFeatures(Rgray, blobs2);
-    indexPairs = matchFeatures(features1, features2, 'Metric', 'SAD', ...
-        'MatchThreshold', 5);
+    [features1, validBlobs1] = extractFeatures(Lgray, selectStrongest(blobs1, 1));
+    [features2, validBlobs2] = extractFeatures(Rgray, selectStrongest(blobs2, 1));
+    indexPairs = matchFeatures(features1, features2, 'Metric', 'SSD', ...
+        'MatchThreshold', 100);
     matchedPoints1 = validBlobs1(indexPairs(:,1),:);
     matchedPoints2 = validBlobs2(indexPairs(:,2),:);
     

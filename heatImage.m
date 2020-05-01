@@ -44,28 +44,32 @@ fopen(com);
     imageL = imresize(imageL,[360 480]);
     imageR = imresize(imageR,[360 480]);
     
-%     figure(3);    
-%     imageL = imadjust(imageL,[0.75 1],[]);
-%     imageL = imsharpen(imageL,'Radius',2,'Amount',50);
-%     imageR = imadjust(imageR,[0.75 1],[]);
-%     imageR = imsharpen(imageR,'Radius',2,'Amount',50);
+    figure(3);    
+    imageL = imadjust(imageL,[0.55 1],[]);
+    imageR = imadjust(imageR,[0.55 1],[]);
+%     imageL = imsharpen(imageL,'Radius',2,'Amount',10);
+%     imageR = imsharpen(imageR,'Radius',2,'Amount',10);
 %     imshowpair(imageL, imageR,'montage');
 %     title('Image 1 (left); Image 2 (right)');
     
     Lgray = rgb2gray(imageL);
     Rgray = rgb2gray(imageR);
+%     Lgray = edge(Lgray,'Roberts');
+%     Rgray = edge(Rgray,'Roberts');
+    imshowpair(Lgray, Rgray,'montage');
+    title('Image 1 (left); Image 2 (right)');
     
     blobs1 = detectSURFFeatures(Lgray, 'MetricThreshold', 2000);
     blobs2 = detectSURFFeatures(Rgray, 'MetricThreshold', 2000);
     
     figure(4);
-    imshow(imageR);
+    imshow(Rgray);
     hold on;
     plot(selectStrongest(blobs2, 30));
     title('Thirty strongest SURF features in right sensor');
     
     figure(5);
-    imshow(imageL);
+    imshow(Lgray);
     hold on;
     plot(selectStrongest(blobs1, 30));
     title('Thirty strongest SURF features in left sensor');
@@ -73,7 +77,7 @@ fopen(com);
     [features1, validBlobs1] = extractFeatures(Lgray, blobs1);
     [features2, validBlobs2] = extractFeatures(Rgray, blobs2);
     indexPairs = matchFeatures(features1, features2, 'Metric', 'SAD', ...
-        'MatchThreshold', 5);
+        'MatchThreshold', 100);
     matchedPoints1 = validBlobs1(indexPairs(:,1),:);
     matchedPoints2 = validBlobs2(indexPairs(:,2),:);
     
@@ -83,11 +87,11 @@ fopen(com);
         'Putatively matched points in right');
     title('Putatively matched points');
     
-    if blobs1.Count > 0 && blobs2.Count > 0
-        xL = blobs1.Location(1,1);
-        yL = blobs1.Location(1,2);
-        xR = blobs2.Location(1,1);
-        yR = blobs2.Location(1,2);
+    if matchedPoints1.Count > 0 && matchedPoints2.Count > 0
+        xL = round(matchedPoints1.Location(1,1));
+        yL = round(matchedPoints1.Location(1,2));
+        xR = round(matchedPoints2.Location(1,1));
+        yR = round(matchedPoints2.Location(1,2));
         
         temp = (imgL(round(yL),round(xL))+imgR(round(yR),round(xR)))/2;
         
