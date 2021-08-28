@@ -109,7 +109,7 @@ set(handles.status,'string','Running...');
 D = 12.2;
 H = 4.8;
 global com;
-port = get(handles.comPort, 'String')
+port = get(handles.comPort, 'String');
 com = serial(port,'BaudRate',250000,'Terminator','CR');
 com.InputBufferSize = 10000;
 fopen(com);
